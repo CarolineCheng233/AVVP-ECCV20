@@ -6,8 +6,10 @@ import numpy
 import copy
 import math
 
+
 def _get_clones(module, N):
     return nn.ModuleList([copy.deepcopy(module) for i in range(N)])
+
 
 class Encoder(nn.Module):
 
@@ -25,7 +27,7 @@ class Encoder(nn.Module):
 
         for i in range(self.num_layers):
             output_a = self.layers[i](src_a, src_v, src_mask=mask,
-                                    src_key_padding_mask=src_key_padding_mask)
+                                      src_key_padding_mask=src_key_padding_mask)
             output_v = self.layers[i](src_v, src_a, src_mask=mask,
                                       src_key_padding_mask=src_key_padding_mask)
 
@@ -34,6 +36,7 @@ class Encoder(nn.Module):
             output_v = self.norm2(output_v)
 
         return output_a, output_v
+
 
 class HANLayer(nn.Module):
 
@@ -69,7 +72,7 @@ class HANLayer(nn.Module):
         src_q = src_q.permute(1, 0, 2)
         src_v = src_v.permute(1, 0, 2)
         src1 = self.cm_attn(src_q, src_v, src_v, attn_mask=src_mask,
-                              key_padding_mask=src_key_padding_mask)[0]
+                            key_padding_mask=src_key_padding_mask)[0]
         src2 = self.self_attn(src_q, src_q, src_q, attn_mask=src_mask,
                               key_padding_mask=src_key_padding_mask)[0]
         src_q = src_q + self.dropout11(src1) + self.dropout12(src2)
@@ -79,7 +82,6 @@ class HANLayer(nn.Module):
         src_q = src_q + self.dropout2(src2)
         src_q = self.norm2(src_q)
         return src_q.permute(1, 0, 2)
-
 
 
 class MMIL_Net(nn.Module):
@@ -94,10 +96,10 @@ class MMIL_Net(nn.Module):
         self.fc_v = nn.Linear(2048, 512)
         self.fc_st = nn.Linear(512, 512)
         self.fc_fusion = nn.Linear(1024, 512)
-        self.audio_encoder = nn.TransformerEncoder \
-            (nn.TransformerEncoderLayer(d_model=512, nhead=1, dim_feedforward=512), num_layers=1)
-        self.visual_encoder = nn.TransformerEncoder \
-            (nn.TransformerEncoderLayer(d_model=512, nhead=1, dim_feedforward=512), num_layers=1)
+        self.audio_encoder = nn.TransformerEncoder(nn.TransformerEncoderLayer
+                                                   (d_model=512, nhead=1, dim_feedforward=512), num_layers=1)
+        self.visual_encoder = nn.TransformerEncoder(nn.TransformerEncoderLayer
+                                                    (d_model=512, nhead=1, dim_feedforward=512), num_layers=1)
         self.cmt_encoder = Encoder(CMTLayer(d_model=512, nhead=1, dim_feedforward=512), num_layers=1)
         self.hat_encoder = Encoder(HANLayer(d_model=512, nhead=1, dim_feedforward=512), num_layers=1)
 
@@ -129,6 +131,7 @@ class MMIL_Net(nn.Module):
         v_prob =temporal_prob[:, :, 1, :].sum(dim=1)
 
         return global_prob, a_prob, v_prob, frame_prob
+
 
 class CMTLayer(nn.Module):
 

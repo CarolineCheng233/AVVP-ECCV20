@@ -1,12 +1,12 @@
 from __future__ import print_function
 import argparse
-import torch
 import torch.nn as nn
 import torch.optim as optim
 from dataloader import *
 from nets.net_audiovisual import MMIL_Net
 from utils.eval_metrics import segment_level, event_level
 import pandas as pd
+
 
 def train(args, model, train_loader, optimizer, criterion, epoch):
     model.train()
@@ -33,7 +33,7 @@ def train(args, model, train_loader, optimizer, criterion, epoch):
         if batch_idx % args.log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(audio), len(train_loader.dataset),
-                       100. * batch_idx / len(train_loader), loss.item()))
+                100. * batch_idx / len(train_loader), loss.item()))
 
 
 def eval(model, val_loader, set):
@@ -83,7 +83,7 @@ def eval(model, val_loader, set):
             onsets = df_vid_a["onset"]
             offsets = df_vid_a["offset"]
             num = len(filenames)
-            if num >0:
+            if num > 0:
                 for i in range(num):
 
                     x1 = int(onsets[df_vid_a.index[i]])
@@ -127,7 +127,6 @@ def eval(model, val_loader, set):
             F_event_v.append(f_v)
             F_event.append(f)
             F_event_av.append(f_av)
-
     
     print('Audio Event Detection Segment-level F1: {:.1f}'.format(100 * np.mean(np.array(F_seg_a))))
     print('Visual Event Detection Segment-level F1: {:.1f}'.format(100 * np.mean(np.array(F_seg_v))))
@@ -151,7 +150,6 @@ def eval(model, val_loader, set):
 
 
 def main():
-
     # Training settings
     parser = argparse.ArgumentParser(description='PyTorch Implementation of Audio-Visual Video Parsing')
     parser.add_argument(
@@ -200,12 +198,16 @@ def main():
         raise ('not recognized')
 
     if args.mode == 'train':
-        train_dataset = LLP_dataset(label=args.label_train, audio_dir=args.audio_dir, video_dir=args.video_dir, st_dir=args.st_dir, transform = transforms.Compose([
-                                               ToTensor()]))
-        val_dataset = LLP_dataset(label=args.label_val, audio_dir=args.audio_dir, video_dir=args.video_dir, st_dir=args.st_dir, transform = transforms.Compose([
-                                               ToTensor()]))
-        train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=12, pin_memory = True)
-        val_loader = DataLoader(val_dataset, batch_size=1, shuffle=False, num_workers=1, pin_memory = True)
+        train_dataset = LLP_dataset(label=args.label_train, audio_dir=args.audio_dir,
+                                    video_dir=args.video_dir, st_dir=args.st_dir,
+                                    transform=transforms.Compose([ToTensor()]))
+        val_dataset = LLP_dataset(label=args.label_val, audio_dir=args.audio_dir,
+                                  video_dir=args.video_dir, st_dir=args.st_dir,
+                                  transform=transforms.Compose([ToTensor()]))
+        train_loader = DataLoader(train_dataset, batch_size=args.batch_size,
+                                  shuffle=True, num_workers=12, pin_memory=True)
+        val_loader = DataLoader(val_dataset, batch_size=1, shuffle=False,
+                                num_workers=1, pin_memory=True)
 
         optimizer = optim.Adam(model.parameters(), lr=args.lr)
         scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
@@ -219,17 +221,20 @@ def main():
                 best_F = F
                 torch.save(model.state_dict(), args.model_save_dir + args.checkpoint + ".pt")
     elif args.mode == 'val':
-        test_dataset = LLP_dataset(label=args.label_val, audio_dir=args.audio_dir, video_dir=args.video_dir,
-                                    st_dir=args.st_dir, transform=transforms.Compose([
-                ToTensor()]))
+        test_dataset = LLP_dataset(label=args.label_val, audio_dir=args.audio_dir,
+                                   video_dir=args.video_dir, st_dir=args.st_dir,
+                                   transform=transforms.Compose([ToTensor()]))
         test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=1, pin_memory=True)
         model.load_state_dict(torch.load(args.model_save_dir + args.checkpoint + ".pt"))
         eval(model, test_loader, args.label_val)
     else:
-        test_dataset = LLP_dataset(label=args.label_test, audio_dir=args.audio_dir, video_dir=args.video_dir,  st_dir=args.st_dir, transform = transforms.Compose([
-                                               ToTensor()]))
+        test_dataset = LLP_dataset(label=args.label_test, audio_dir=args.audio_dir,
+                                   video_dir=args.video_dir,  st_dir=args.st_dir,
+                                   transform=transforms.Compose([ToTensor()]))
         test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=1, pin_memory=True)
         model.load_state_dict(torch.load(args.model_save_dir + args.checkpoint + ".pt"))
         eval(model, test_loader, args.label_test)
+
+
 if __name__ == '__main__':
     main()

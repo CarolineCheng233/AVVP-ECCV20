@@ -6,7 +6,6 @@ from torchvision import transforms, utils
 import pandas as pd
 
 
-
 def ids_to_multinomial(ids):
     """ label encoding
 
@@ -26,7 +25,6 @@ def ids_to_multinomial(ids):
         index = id_to_idx[id]
         y[index] = 1
     return y
-
 
 
 class LLP_dataset(Dataset):
@@ -57,7 +55,8 @@ class LLP_dataset(Dataset):
 
         return sample
 
-class ToTensor(object):
+
+class ToTensor:
 
     def __call__(self, sample):
         if len(sample) == 2:

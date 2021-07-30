@@ -1,7 +1,7 @@
 import numpy as np
 
-def Precision(X_pre, X_gt):
 
+def Precision(X_pre, X_gt):
     N = len(X_pre)
     p = 0.0
     for i in range(N):
@@ -29,6 +29,7 @@ def F1(X_pre, X_gt):
         y = X_gt[i, :]
         p += 2*np.sum(x * y) / (np.sum(x) + np.sum(y))
     return p/N
+
 
 def event_level(SO_a, SO_v, SO_av, GT_a, GT_v, GT_av):
     # extract events
@@ -212,6 +213,7 @@ def to_vec(start, end):
         x[i] = 1
     return x
 
+
 def extract_event(seq, n):
     x = []
     i = 0
@@ -239,6 +241,7 @@ def extract_event(seq, n):
         else:
             i += 1
     return x
+
 
 def event_wise_metric(event_p, event_gt):
     TP = 0
@@ -272,7 +275,7 @@ def event_wise_metric(event_p, event_gt):
                 flag = True
                 for j in range(nn):
                     x2 = event_p[j]
-                    if np.sum(x1 * x2) >= 0.5 * np.sum(x1 + x2 - x1 * x2): #0.5
+                    if np.sum(x1 * x2) >= 0.5 * np.sum(x1 + x2 - x1 * x2):  # 0.5
                         flag = False
                         break
                 if flag:
