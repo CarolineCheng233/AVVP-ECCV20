@@ -146,7 +146,6 @@ def event_level(SO_a, SO_v, SO_av, GT_a, GT_v, GT_av):
 
 def segment_level(SO_a, SO_v, SO_av, GT_a, GT_v, GT_av):
     # compute F scores
-    import pdb; pdb.set_trace()
     # audio
     TP_a = np.sum(SO_a * GT_a, axis=1)  # 25
     FN_a = np.sum((1 - SO_a) * GT_a, axis=1)  # 25
