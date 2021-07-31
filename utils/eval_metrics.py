@@ -131,7 +131,6 @@ def event_level(SO_a, SO_v, SO_av, GT_a, GT_v, GT_av):
     else:
         f_v = (sum(F_v) / len(F_v))
 
-    assert len(F) != 0, 'something wrong in event_level'
     if len(F) == 0:  # 该视频没有任何事件发生—不会出现这种情况
         f = 1.0  # all true negatives
     else:
@@ -198,7 +197,6 @@ def segment_level(SO_a, SO_v, SO_av, GT_a, GT_v, GT_av):
     else:
         f_v = (sum(F_v) / len(F_v))
 
-    assert len(F) != 0, 'something wrong in segment_level'
     if len(F) == 0:  # 没有任何audio或visual事件发生-不会有这种情况
         f = 1.0  # all true negatives
     else:
