@@ -92,7 +92,7 @@ class MMIL_Net(nn.Module):
         self.fc_prob = nn.Linear(512, 25)
         self.fc_frame_att = nn.Linear(512, 25)
         self.fc_av_att = nn.Linear(512, 25)
-        self.fc_a =  nn.Linear(128, 512)
+        self.fc_a = nn.Linear(128, 512)
         self.fc_v = nn.Linear(2048, 512)
         self.fc_st = nn.Linear(512, 512)
         self.fc_fusion = nn.Linear(1024, 512)
@@ -104,14 +104,16 @@ class MMIL_Net(nn.Module):
         self.hat_encoder = Encoder(HANLayer(d_model=512, nhead=1, dim_feedforward=512), num_layers=1)
 
     def forward(self, audio, visual, visual_st):
-
-        x1 = self.fc_a(audio)
+        # audio:  [10, 128]
+        # visual: [8 * 10, 2048]
+        # visual_st: [10, 512]
+        x1 = self.fc_a(audio)  # [10, 512]
 
         # 2d and 3d visual feature fusion
-        vid_s = self.fc_v(visual).permute(0, 2, 1).unsqueeze(-1)
+        vid_s = self.fc_v(visual).permute(0, 2, 1).unsqueeze(-1)  # []
         vid_s = F.avg_pool2d(vid_s, (8, 1)).squeeze(-1).permute(0, 2, 1)
-        vid_st = self.fc_st(visual_st)
-        x2 = torch.cat((vid_s, vid_st), dim =-1)
+        vid_st = self.fc_st(visual_st)  # [10, 512]
+        x2 = torch.cat((vid_s, vid_st), dim=-1)
         x2 = self.fc_fusion(x2)
 
         # HAN

@@ -32,9 +32,9 @@ class LLP_dataset(Dataset):
     def __init__(self, label, audio_dir, video_dir, st_dir, transform=None):
         self.df = pd.read_csv(label, header=0, sep='\t')
         self.filenames = self.df["filename"]
-        self.audio_dir = audio_dir
-        self.video_dir = video_dir
-        self.st_dir = st_dir
+        self.audio_dir = audio_dir  # [10, 128]
+        self.video_dir = video_dir  # [8 * 10, 2048]
+        self.st_dir = st_dir  # [10, 512]
         self.transform = transform
 
     def __len__(self):

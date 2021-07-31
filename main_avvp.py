@@ -62,7 +62,8 @@ def eval(model, val_loader, set):
 
     with torch.no_grad():
         for batch_idx, sample in enumerate(val_loader):
-            audio, video, video_st, target = sample['audio'].to('cuda'), sample['video_s'].to('cuda'),sample['video_st'].to('cuda'), sample['label'].to('cuda')
+            audio, video, video_st, target = sample['audio'].to('cuda'), sample['video_s'].to('cuda'),\
+                                             sample['video_st'].to('cuda'), sample['label'].to('cuda')
             output, a_prob, v_prob, frame_prob = model(audio, video, video_st)
             o = (output.cpu().detach().numpy() >= 0.5).astype(np.int_)
 
@@ -75,7 +76,7 @@ def eval(model, val_loader, set):
 
             # extract audio GT labels
             GT_a = np.zeros((25, 10))
-            GT_v =np.zeros((25, 10))
+            GT_v = np.zeros((25, 10))
 
             df_vid_a = df_a.loc[df_a['filename'] == df.loc[batch_idx, :][0]]
             filenames = df_vid_a["filename"]
