@@ -53,10 +53,10 @@ def event_level(SO_a, SO_v, SO_av, GT_a, GT_v, GT_av):
     FN_v = np.zeros(25)
     FN_av = np.zeros(25)
 
-    for n in range(N):
+    for n in range(N):  # 对每个类别分别计算
         seq_pred = SO_a[n, :]
         if np.sum(seq_pred) != 0:
-            x = extract_event(seq_pred, n)
+            x = extract_event(seq_pred, n)  # 每个event分别提取出来一个array
             event_p_a[n] = x
         seq_gt = GT_a[n, :]
         if np.sum(seq_gt) != 0:
@@ -76,7 +76,6 @@ def event_level(SO_a, SO_v, SO_av, GT_a, GT_v, GT_av):
         if np.sum(seq_pred) != 0:
             x = extract_event(seq_pred, n)
             event_p_av[n] = x
-
         seq_gt = GT_av[n, :]
         if np.sum(seq_gt) != 0:
             x = extract_event(seq_gt, n)
@@ -122,24 +121,25 @@ def event_level(SO_a, SO_v, SO_av, GT_a, GT_v, GT_av):
         if (TP_av + FP_av)[ii] != 0 or (TP_av + FN_av)[ii] != 0:
             F_av.append(2 * TP_av[ii] / (2 * TP_av[ii] + (FN_av + FP_av)[ii]))
 
-    if len(F_a) == 0:
+    if len(F_a) == 0:  # 该视频没有audio事件发生且没有预测任何audio事件
         f_a = 1.0  # all true negatives
     else:
-        f_a = (sum(F_a)/len(F_a))
+        f_a = (sum(F_a) / len(F_a))
 
-    if len(F_v) == 0:
+    if len(F_v) == 0:  # 该视频没有visual事件发生且没有预测任何visual事件
         f_v = 1.0  # all true negatives
     else:
-        f_v = (sum(F_v)/len(F_v))
+        f_v = (sum(F_v) / len(F_v))
 
-    if len(F) == 0:
+    assert len(F) != 0, 'something wrong in event_level'
+    if len(F) == 0:  # 该视频没有任何事件发生—不会出现这种情况
         f = 1.0  # all true negatives
     else:
-        f = (sum(F)/len(F))
-    if len(F_av) == 0:
+        f = (sum(F) / len(F))
+    if len(F_av) == 0:  # 该视频没有任何audio-visual事件发生且没有预测任何audio-visual事件
         f_av = 1.0  # all true negatives
     else:
-        f_av = (sum(F_av)/len(F_av))
+        f_av = (sum(F_av) / len(F_av))
 
     return f_a, f_v, f, f_av
 
@@ -147,16 +147,18 @@ def event_level(SO_a, SO_v, SO_av, GT_a, GT_v, GT_av):
 def segment_level(SO_a, SO_v, SO_av, GT_a, GT_v, GT_av):
     # compute F scores
     import pdb; pdb.set_trace()
+    # audio
     TP_a = np.sum(SO_a * GT_a, axis=1)  # 25
     FN_a = np.sum((1 - SO_a) * GT_a, axis=1)  # 25
     FP_a = np.sum(SO_a * (1 - GT_a), axis=1)  # 25
 
     n = len(FP_a)
     F_a = []
-    for ii in range(n):
+    for ii in range(n):  # 对于每个类别计算F-score
         if (TP_a + FP_a)[ii] != 0 or (TP_a + FN_a)[ii] != 0:
             F_a.append(2 * TP_a[ii] / (2 * TP_a[ii] + (FN_a + FP_a)[ii]))
 
+    # visual
     TP_v = np.sum(SO_v * GT_v, axis=1)
     FN_v = np.sum((1 - SO_v) * GT_v, axis=1)
     FP_v = np.sum(SO_v * (1 - GT_v), axis=1)
@@ -165,6 +167,7 @@ def segment_level(SO_a, SO_v, SO_av, GT_a, GT_v, GT_av):
         if (TP_v + FP_v)[ii] != 0 or (TP_v + FN_v)[ii] != 0:
             F_v.append(2 * TP_v[ii] / (2 * TP_v[ii] + (FN_v + FP_v)[ii]))
 
+    # audio-visual, 并集
     TP = TP_a + TP_v
     FN = FN_a + FN_v
     FP = FP_a + FP_v
@@ -176,6 +179,7 @@ def segment_level(SO_a, SO_v, SO_av, GT_a, GT_v, GT_av):
         if (TP + FP)[ii] != 0 or (TP + FN)[ii] != 0:
             F.append(2 * TP[ii] / (2 * TP[ii] + (FN + FP)[ii]))
 
+    # audio-visual, 交集
     TP_av = np.sum(SO_av * GT_av, axis=1)
     FN_av = np.sum((1 - SO_av) * GT_av, axis=1)
     FP_av = np.sum(SO_av * (1 - GT_av), axis=1)
@@ -185,24 +189,25 @@ def segment_level(SO_a, SO_v, SO_av, GT_a, GT_v, GT_av):
         if (TP_av + FP_av)[ii] != 0 or (TP_av + FN_av)[ii] != 0:
             F_av.append(2 * TP_av[ii] / (2 * TP_av[ii] + (FN_av + FP_av)[ii]))
 
-    if len(F_a) == 0:
+    if len(F_a) == 0:  # 该视频没有audio事件发生并且也没有预测出任何audio事件
         f_a = 1.0  # all true negatives
     else:
-        f_a = (sum(F_a)/len(F_a))
+        f_a = (sum(F_a) / len(F_a))
 
-    if len(F_v) == 0:
+    if len(F_v) == 0:  # 该视频没有visual事件发生并且也没有预测出任何visual事件
         f_v = 1.0  # all true negatives
     else:
-        f_v = (sum(F_v)/len(F_v))
+        f_v = (sum(F_v) / len(F_v))
 
-    if len(F) == 0:
+    assert len(F) != 0, 'something wrong in segment_level'
+    if len(F) == 0:  # 没有任何audio或visual事件发生-不会有这种情况
         f = 1.0  # all true negatives
     else:
-        f = (sum(F)/len(F))
-    if len(F_av) == 0:
+        f = (sum(F) / len(F))
+    if len(F_av) == 0:  # 没有任何audio-visual事件(交集)并且也没有预测出任何audio-visual交集事件
         f_av = 1.0  # all true negatives
     else:
-        f_av = (sum(F_av)/len(F_av))
+        f_av = (sum(F_av) / len(F_av))
 
     return f_a, f_v, f, f_av
 
@@ -248,7 +253,7 @@ def event_wise_metric(event_p, event_gt):
     FP = 0
     FN = 0
 
-    if event_p is not None:
+    if event_p is not None:  # 因为阈值是0.5,并且两个相邻的segment会被merge,因此不会产生两个pred对上同一个gt的情况
         num_event = len(event_p)
         for i in range(num_event):
             x1 = event_p[i]
