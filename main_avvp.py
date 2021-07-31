@@ -152,8 +152,8 @@ def eval(model, val_loader, set):
     print('Event-level Type@Avg. F1: {:.1f}'.format(avg_type_event))
     print('Event-level Event@Avg. F1: {:.1f}'.format(avg_event_level))
 
-    check_low_confidence_togh(F_seg_a, F_seg_v, F_seg, F_seg_av, F_event_a, F_event_v, F_event, F_event_av, val_loader,
-                              5, "data/low_confidence_5%.txt")
+    write_conf(F_seg_a, F_seg_v, F_seg, F_seg_av, F_event_a, F_event_v, F_event, F_event_av,
+               "data/all_confidence.txt", "data/AVVP_test_pd.csv")
 
     return avg_type
 
