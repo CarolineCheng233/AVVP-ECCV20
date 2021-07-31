@@ -21,12 +21,12 @@ def train(args, model, train_loader, optimizer, criterion, epoch):
 
         # label smoothing
         a = 1.0
-        v = 0.9 
+        v = 0.9
         Pa = a * target + (1 - a) * 0.5
         Pv = v * target + (1 - v) * 0.5
 
         # individual guided learning
-        loss =  criterion(a_prob, Pa) + criterion(v_prob, Pv) + criterion(output, target) 
+        loss = criterion(a_prob, Pa) + criterion(v_prob, Pv) + criterion(output, target)
 
         loss.backward()
         optimizer.step()

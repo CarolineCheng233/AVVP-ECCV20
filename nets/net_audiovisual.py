@@ -110,6 +110,7 @@ class MMIL_Net(nn.Module):
         x1 = self.fc_a(audio)  # [10, 512]
 
         # 2d and 3d visual feature fusion
+        import pdb; pdb.set_trace()
         vid_s = self.fc_v(visual).permute(0, 2, 1).unsqueeze(-1)
         vid_s = F.avg_pool2d(vid_s, (8, 1)).squeeze(-1).permute(0, 2, 1)
         vid_st = self.fc_st(visual_st)  # [10, 512]
