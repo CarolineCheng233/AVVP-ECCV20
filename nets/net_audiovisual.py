@@ -42,8 +42,8 @@ class HANLayer(nn.Module):
 
     def __init__(self, d_model, nhead, dim_feedforward=512, dropout=0.1):
         super(HANLayer, self).__init__()
-        self.self_attn = nn.MultiheadAttention(d_model, nhead, dropout=dropout)
-        self.cm_attn = nn.MultiheadAttention(d_model, nhead, dropout=dropout)
+        self.self_attn = nn.MultiheadAttention(d_model, nhead, dropout=dropout)  # self-attention
+        self.cm_attn = nn.MultiheadAttention(d_model, nhead, dropout=dropout)    # cross-attention
 
         # Implementation of Feedforward model
         self.linear1 = nn.Linear(d_model, dim_feedforward)
@@ -62,13 +62,14 @@ class HANLayer(nn.Module):
         """Pass the input through the encoder layer.
 
         Args:
-            src: the sequnce to the encoder layer (required).
+            src: the sequence to the encoder layer (required).
             src_mask: the mask for the src sequence (optional).
             src_key_padding_mask: the mask for the src keys per batch (optional).
 
         Shape:
             see the docs in Transformer class.
         """
+        import pdb; pdb.set_trace()
         src_q = src_q.permute(1, 0, 2)
         src_v = src_v.permute(1, 0, 2)
         src1 = self.cm_attn(src_q, src_v, src_v, attn_mask=src_mask,
@@ -104,18 +105,17 @@ class MMIL_Net(nn.Module):
         self.hat_encoder = Encoder(HANLayer(d_model=512, nhead=1, dim_feedforward=512), num_layers=1)
 
     def forward(self, audio, visual, visual_st):
-        # audio:  [10, 128]
-        # visual: [8 * 10, 2048]
-        # visual_st: [10, 512]
-        x1 = self.fc_a(audio)  # [10, 512]
+        # audio:  [1, 10, 128]  batch_size=1
+        # visual: [1, 80, 2048]
+        # visual_st: [1, 10, 512]
+        x1 = self.fc_a(audio)  # [1, 10, 512]
 
         # 2d and 3d visual feature fusion
-        import pdb; pdb.set_trace()
-        vid_s = self.fc_v(visual).permute(0, 2, 1).unsqueeze(-1)
-        vid_s = F.avg_pool2d(vid_s, (8, 1)).squeeze(-1).permute(0, 2, 1)
-        vid_st = self.fc_st(visual_st)  # [10, 512]
-        x2 = torch.cat((vid_s, vid_st), dim=-1)
-        x2 = self.fc_fusion(x2)
+        vid_s = self.fc_v(visual).permute(0, 2, 1).unsqueeze(-1)  # [1, 512, 80, 1]
+        vid_s = F.avg_pool2d(vid_s, (8, 1)).squeeze(-1).permute(0, 2, 1)  # [1, 10, 512]
+        vid_st = self.fc_st(visual_st)  # [1, 10, 512]
+        x2 = torch.cat((vid_s, vid_st), dim=-1)  # [1, 10, 1024]
+        x2 = self.fc_fusion(x2)  # [1, 10, 512]
 
         # HAN
         x1, x2 = self.hat_encoder(x1, x2)
