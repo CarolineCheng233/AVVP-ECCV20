@@ -44,7 +44,7 @@ def eval(model, val_loader, set):
                   'Acoustic_guitar', 'Telephone_bell_ringing', 'Baby_cry_infant_cry', 'Blender',
                   'Clapping']
     model.eval()
-
+    print("begin evaluate.")
     # load annotations
     df = pd.read_csv(set, header=0, sep='\t')
     df_a = pd.read_csv("data/AVVP_eval_audio.csv", header=0, sep='\t')
