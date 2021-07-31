@@ -112,8 +112,8 @@ def write_conf(F_seg_a, F_seg_v, F_seg, F_seg_av, F_event_a, F_event_v, F_event,
     idxes = np.argsort(scores)
 
     df = pd.read_csv(anno_file, header=0, sep='\t')
-    videos = df.loc[:, :]
-    filenames = videos[:, 0]
+    filenames = df.loc[:, 0]
+    # filenames = videos[:, 0]
 
     with open(file, 'w', encoding='utf-8') as f:
         f.write("filename\ttotal_score\n")
