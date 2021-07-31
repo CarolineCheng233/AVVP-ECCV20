@@ -133,7 +133,9 @@ def eval(model, val_loader, set):
     print('Visual Event Detection Segment-level F1: {:.1f}'.format(100 * np.mean(np.array(F_seg_v))))
     print('Audio-Visual Event Detection Segment-level F1: {:.1f}'.format(100 * np.mean(np.array(F_seg_av))))
 
-    avg_type = (100 * np.mean(np.array(F_seg_av))+100 * np.mean(np.array(F_seg_a))+100 * np.mean(np.array(F_seg_v)))/3.
+    avg_type = (100 * np.mean(np.array(F_seg_av)) +
+                100 * np.mean(np.array(F_seg_a)) +
+                100 * np.mean(np.array(F_seg_v)))/3.
     avg_event = 100 * np.mean(np.array(F_seg))
     print('Segment-levelType@Avg. F1: {:.1f}'.format(avg_type))
     print('Segment-level Event@Avg. F1: {:.1f}'.format(avg_event))
@@ -142,8 +144,9 @@ def eval(model, val_loader, set):
     print('Visual Event Detection Event-level F1: {:.1f}'.format(100 * np.mean(np.array(F_event_v))))
     print('Audio-Visual Event Detection Event-level F1: {:.1f}'.format(100 * np.mean(np.array(F_event_av))))
 
-    avg_type_event = (100 * np.mean(np.array(F_event_av)) + 100 * np.mean(np.array(F_event_a)) + 100 * np.mean(
-        np.array(F_event_v))) / 3.
+    avg_type_event = (100 * np.mean(np.array(F_event_av)) +
+                      100 * np.mean(np.array(F_event_a)) +
+                      100 * np.mean(np.array(F_event_v))) / 3.
     avg_event_level = 100 * np.mean(np.array(F_event))
     print('Event-level Type@Avg. F1: {:.1f}'.format(avg_type_event))
     print('Event-level Event@Avg. F1: {:.1f}'.format(avg_event_level))

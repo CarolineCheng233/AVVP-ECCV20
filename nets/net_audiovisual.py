@@ -27,9 +27,12 @@ class Encoder(nn.Module):
 
         for i in range(self.num_layers):
             output_a = self.layers[i](src_a, src_v, src_mask=mask,
-                                      src_key_padding_mask=src_key_padding_mask)
+                                      src_key_padding_mask=src_key_padding_mask)  # audio做attention
             output_v = self.layers[i](src_v, src_a, src_mask=mask,
-                                      src_key_padding_mask=src_key_padding_mask)
+                                      src_key_padding_mask=src_key_padding_mask)  # visual做attention
+            # 原来没有下面两行
+            src_a = output_a
+            src_v = output_v
 
         if self.norm:
             output_a = self.norm1(output_a)
@@ -39,7 +42,8 @@ class Encoder(nn.Module):
 
 
 class HANLayer(nn.Module):
-
+    # transformer encoder层
+    # 跟attention is all you need里的encoder结构一样,只是同时有self-attention和cross-attention
     def __init__(self, d_model, nhead, dim_feedforward=512, dropout=0.1):
         super(HANLayer, self).__init__()
         self.self_attn = nn.MultiheadAttention(d_model, nhead, dropout=dropout)  # self-attention
@@ -69,7 +73,6 @@ class HANLayer(nn.Module):
         Shape:
             see the docs in Transformer class.
         """
-        import pdb; pdb.set_trace()
         src_q = src_q.permute(1, 0, 2)
         src_v = src_v.permute(1, 0, 2)
         src1 = self.cm_attn(src_q, src_v, src_v, attn_mask=src_mask,
@@ -105,39 +108,39 @@ class MMIL_Net(nn.Module):
         self.hat_encoder = Encoder(HANLayer(d_model=512, nhead=1, dim_feedforward=512), num_layers=1)
 
     def forward(self, audio, visual, visual_st):
-        # audio:  [1, 10, 128]  batch_size=1
-        # visual: [1, 80, 2048]
-        # visual_st: [1, 10, 512]
-        x1 = self.fc_a(audio)  # [1, 10, 512]
+        # audio:  [batch, 10, 128]
+        # visual: [batch, 80, 2048]
+        # visual_st: [batch, 10, 512]
+        x1 = self.fc_a(audio)  # [batch, 10, 512]
 
         # 2d and 3d visual feature fusion
-        vid_s = self.fc_v(visual).permute(0, 2, 1).unsqueeze(-1)  # [1, 512, 80, 1]
-        vid_s = F.avg_pool2d(vid_s, (8, 1)).squeeze(-1).permute(0, 2, 1)  # [1, 10, 512]
-        vid_st = self.fc_st(visual_st)  # [1, 10, 512]
-        x2 = torch.cat((vid_s, vid_st), dim=-1)  # [1, 10, 1024]
-        x2 = self.fc_fusion(x2)  # [1, 10, 512]
+        vid_s = self.fc_v(visual).permute(0, 2, 1).unsqueeze(-1)  # [batch, 512, 80, 1]
+        vid_s = F.avg_pool2d(vid_s, (8, 1)).squeeze(-1).permute(0, 2, 1)  # [batch, 10, 512]
+        vid_st = self.fc_st(visual_st)  # [batch, 10, 512]
+        x2 = torch.cat((vid_s, vid_st), dim=-1)  # [batch, 10, 1024]
+        x2 = self.fc_fusion(x2)  # [batch, 10, 512]
 
         # HAN
         x1, x2 = self.hat_encoder(x1, x2)
 
         # prediction
-        x = torch.cat([x1.unsqueeze(-2), x2.unsqueeze(-2)], dim=-2)
-        frame_prob = torch.sigmoid(self.fc_prob(x))
+        x = torch.cat([x1.unsqueeze(-2), x2.unsqueeze(-2)], dim=-2)  # [batch, 10, 2, 512]
+        frame_prob = torch.sigmoid(self.fc_prob(x))  # [batch, 10, 2, 25], 在分类维度上sigmoid
 
         # attentive MMIL pooling
-        frame_att = torch.softmax(self.fc_frame_att(x), dim=1)
-        av_att = torch.softmax(self.fc_av_att(x), dim=2)
-        temporal_prob = (frame_att * frame_prob)
-        global_prob = (temporal_prob*av_att).sum(dim=2).sum(dim=1)
+        frame_att = torch.softmax(self.fc_frame_att(x), dim=1)  # [batch, 10, 2, 25], 在时间维度上softmax
+        av_att = torch.softmax(self.fc_av_att(x), dim=2)        # [batch, 10, 2, 25], 在模态维度上softmax
+        temporal_prob = frame_att * frame_prob
+        global_prob = (temporal_prob * av_att).sum(dim=2).sum(dim=1)  # [batch, 25]
 
-        a_prob = temporal_prob[:, :, 0, :].sum(dim=1)
-        v_prob =temporal_prob[:, :, 1, :].sum(dim=1)
+        a_prob = temporal_prob[:, :, 0, :].sum(dim=1)  # [batch, 25]
+        v_prob = temporal_prob[:, :, 1, :].sum(dim=1)  # [batch, 25]
 
         return global_prob, a_prob, v_prob, frame_prob
 
 
 class CMTLayer(nn.Module):
-
+    # 只有cross-attention
     def __init__(self, d_model, nhead, dim_feedforward=512, dropout=0.1):
         super(CMTLayer, self).__init__()
         self.self_attn = nn.MultiheadAttention(d_model, nhead, dropout=dropout)
