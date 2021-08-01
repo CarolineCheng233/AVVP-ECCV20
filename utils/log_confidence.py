@@ -119,3 +119,33 @@ def write_conf(F_seg_a, F_seg_v, F_seg, F_seg_av, F_event_a, F_event_v, F_event,
         f.write("filename\ttotal_score\n")
         tmp = ["\t".join([filenames[i], str(round(s, 2))]) for i, s in zip(idxes, scores[idxes])]
         f.write("\n".join(tmp))
+
+
+def print_overall_metric(F_seg_a, F_seg_v, F_seg, F_seg_av, F_event_a, F_event_v, F_event, F_event_av):
+    print('Audio Event Detection Segment-level F1: {:.1f}'.format(100 * np.mean(np.array(F_seg_a))))
+    print('Visual Event Detection Segment-level F1: {:.1f}'.format(100 * np.mean(np.array(F_seg_v))))
+    print('Audio-Visual Event Detection Segment-level F1: {:.1f}'.format(100 * np.mean(np.array(F_seg_av))))
+
+    avg_type = (100 * np.mean(np.array(F_seg_av)) +
+                100 * np.mean(np.array(F_seg_a)) +
+                100 * np.mean(np.array(F_seg_v))) / 3.
+    avg_event = 100 * np.mean(np.array(F_seg))
+    print('Segment-level Type@Avg. F1: {:.1f}'.format(avg_type))
+    print('Segment-level Event@Avg. F1: {:.1f}'.format(avg_event))
+
+    print('Audio Event Detection Event-level F1: {:.1f}'.format(100 * np.mean(np.array(F_event_a))))
+    print('Visual Event Detection Event-level F1: {:.1f}'.format(100 * np.mean(np.array(F_event_v))))
+    print('Audio-Visual Event Detection Event-level F1: {:.1f}'.format(100 * np.mean(np.array(F_event_av))))
+
+    avg_type_event = (100 * np.mean(np.array(F_event_av)) +
+                      100 * np.mean(np.array(F_event_a)) +
+                      100 * np.mean(np.array(F_event_v))) / 3.
+    avg_event_level = 100 * np.mean(np.array(F_event))
+    print('Event-level Type@Avg. F1: {:.1f}'.format(avg_type_event))
+    print('Event-level Event@Avg. F1: {:.1f}'.format(avg_event_level))
+
+    return avg_type
+
+
+def log_metric_by_cat(F_seg_a, F_seg_v, F_seg, F_seg_av, F_event_a, F_event_v, F_event, F_event_av):
+    pass

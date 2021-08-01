@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 from dataloader import *
 from nets.net_audiovisual import MMIL_Net
-from utils.eval_metrics import segment_level, event_level
+from utils.eval_metrics import segment_level, event_level, event_level_by_cat, segment_level_by_cat
 from utils.log_confidence import *
 import pandas as pd
 
@@ -117,41 +117,20 @@ def eval(model, val_loader, set):
             SO_av = SO_a * SO_v
 
             # segment-level F1 scores
-            f_a, f_v, f, f_av = segment_level(SO_a, SO_v, SO_av, GT_a, GT_v, GT_av)
+            f_a, f_v, f, f_av = segment_level_by_cat(SO_a, SO_v, SO_av, GT_a, GT_v, GT_av)
             F_seg_a.append(f_a)
             F_seg_v.append(f_v)
             F_seg.append(f)
             F_seg_av.append(f_av)
 
             # event-level F1 scores
-            f_a, f_v, f, f_av = event_level(SO_a, SO_v, SO_av, GT_a, GT_v, GT_av)
+            f_a, f_v, f, f_av = event_level_by_cat(SO_a, SO_v, SO_av, GT_a, GT_v, GT_av)
             F_event_a.append(f_a)
             F_event_v.append(f_v)
             F_event.append(f)
             F_event_av.append(f_av)
-    
-    print('Audio Event Detection Segment-level F1: {:.1f}'.format(100 * np.mean(np.array(F_seg_a))))
-    print('Visual Event Detection Segment-level F1: {:.1f}'.format(100 * np.mean(np.array(F_seg_v))))
-    print('Audio-Visual Event Detection Segment-level F1: {:.1f}'.format(100 * np.mean(np.array(F_seg_av))))
 
-    avg_type = (100 * np.mean(np.array(F_seg_av)) +
-                100 * np.mean(np.array(F_seg_a)) +
-                100 * np.mean(np.array(F_seg_v)))/3.
-    avg_event = 100 * np.mean(np.array(F_seg))
-    print('Segment-level Type@Avg. F1: {:.1f}'.format(avg_type))
-    print('Segment-level Event@Avg. F1: {:.1f}'.format(avg_event))
-
-    print('Audio Event Detection Event-level F1: {:.1f}'.format(100 * np.mean(np.array(F_event_a))))
-    print('Visual Event Detection Event-level F1: {:.1f}'.format(100 * np.mean(np.array(F_event_v))))
-    print('Audio-Visual Event Detection Event-level F1: {:.1f}'.format(100 * np.mean(np.array(F_event_av))))
-
-    avg_type_event = (100 * np.mean(np.array(F_event_av)) +
-                      100 * np.mean(np.array(F_event_a)) +
-                      100 * np.mean(np.array(F_event_v))) / 3.
-    avg_event_level = 100 * np.mean(np.array(F_event))
-    print('Event-level Type@Avg. F1: {:.1f}'.format(avg_type_event))
-    print('Event-level Event@Avg. F1: {:.1f}'.format(avg_event_level))
-
+    avg_type = print_overall_metric(F_seg_a, F_seg_v, F_seg, F_seg_av, F_event_a, F_event_v, F_event, F_event_av)
     write_conf(F_seg_a, F_seg_v, F_seg, F_seg_av, F_event_a, F_event_v, F_event, F_event_av,
                "data/all_confidence.txt", "data/AVVP_test_pd.csv")
 
