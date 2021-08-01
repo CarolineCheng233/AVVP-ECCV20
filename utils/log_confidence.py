@@ -204,3 +204,65 @@ def log_metric_by_cat(F_seg_a, F_seg_v, F_seg, F_seg_av, F_event_a, F_event_v, F
         f.write("\n".join(cat_score))
 
     return scores
+
+
+def log_metric_by_cat_mod(F_seg_a, F_seg_v, F_seg, F_seg_av, F_event_a, F_event_v, F_event, F_event_av, file):
+    # 按照不同类别的不同模态记录
+    F_seg_a = np.array(F_seg_a)  # [number, 25]
+    F_seg_v = np.array(F_seg_v)
+    F_seg = np.array(F_seg)
+    F_seg_av = np.array(F_seg_av)
+    F_event_a = np.array(F_event_a)
+    F_event_v = np.array(F_event_v)
+    F_event = np.array(F_event)
+    F_event_av = np.array(F_event_av)
+
+    seg_a = np.zeros(25)
+    seg_v = np.zeros(25)
+    seg = np.zeros(25)
+    seg_av = np.zeros(25)
+    event_a = np.zeros(25)
+    event_v = np.zeros(25)
+    event = np.zeros(25)
+    event_av = np.zeros(25)
+
+    for i in range(25):
+        idxes = F_seg_a[:, i] != None
+        seg_a[i] = sum(F_seg_a[:, i][idxes]) / sum(idxes)
+
+        idxes = F_seg_v[:, i] != None
+        seg_v[i] = sum(F_seg_v[:, i][idxes]) / sum(idxes)
+
+        idxes = F_seg[:, i] != None
+        seg[i] = sum(F_seg[:, i][idxes]) / sum(idxes)
+
+        idxes = F_seg_av[:, i] != None
+        seg_av[i] = sum(F_seg_av[:, i][idxes]) / sum(idxes)
+
+        idxes = F_event_a[:, i] != None
+        event_a[i] = sum(F_event_a[:, i][idxes]) / sum(idxes)
+
+        idxes = F_event_v[:, i] != None
+        event_v[i] = sum(F_event_v[:, i][idxes]) / sum(idxes)
+
+        idxes = F_event[:, i] != None
+        event[i] = sum(F_event[:, i][idxes]) / sum(idxes)
+
+        idxes = F_event_av[:, i] != None
+        event_av[i] = sum(F_event_av[:, i][idxes]) / sum(idxes)
+
+    scores = (seg_a + seg_v + seg + seg_av + event_a + event_v + event + event_av) / 8.
+    vscores = (seg_v + seg_av + event_v + event_av) / 4.
+    ascores = (seg_a + seg_av + event_a + event_av) / 4.
+    categories = np.array(['Speech', 'Car', 'Cheering', 'Dog', 'Cat', 'Frying_(food)',
+                           'Basketball_bounce', 'Fire_alarm', 'Chainsaw', 'Cello', 'Banjo',
+                           'Singing', 'Chicken_rooster', 'Violin_fiddle', 'Vacuum_cleaner',
+                           'Baby_laughter', 'Accordion', 'Lawn_mower', 'Motorcycle', 'Helicopter',
+                           'Acoustic_guitar', 'Telephone_bell_ringing', 'Baby_cry_infant_cry', 'Blender',
+                           'Clapping'])
+    idxes = np.argsort(scores)
+    cat_score = ["\t".join([categories[i], str(round(vscores[i], 2)), str(round(ascores[i], 2))]) for i in idxes]
+    with open(file, 'w', encoding='utf-8') as f:
+        f.write("\n".join(cat_score))
+
+    return scores

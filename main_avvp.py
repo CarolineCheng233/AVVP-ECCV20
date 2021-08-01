@@ -133,8 +133,8 @@ def eval(model, val_loader, set):
     # avg_type = print_overall_metric(F_seg_a, F_seg_v, F_seg, F_seg_av, F_event_a, F_event_v, F_event, F_event_av)
     # write_conf(F_seg_a, F_seg_v, F_seg, F_seg_av, F_event_a, F_event_v, F_event, F_event_av,
     #            "data/all_confidence.txt", "data/AVVP_test_pd.csv")
-    avg_type = log_metric_by_cat(F_seg_a, F_seg_v, F_seg, F_seg_av, F_event_a, F_event_v, F_event, F_event_av,
-                                 "data/cat_confidence.txt")
+    avg_type = log_metric_by_cat_mod(F_seg_a, F_seg_v, F_seg, F_seg_av, F_event_a, F_event_v, F_event, F_event_av,
+                                     "data/cat_confidence_by_cat_mod.txt")
 
     return avg_type
 
