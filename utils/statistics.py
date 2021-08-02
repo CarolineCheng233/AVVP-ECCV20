@@ -24,9 +24,9 @@ def number_of_event_categories():
     val_labels = val["event_labels"]
     test_labels = test["event_labels"]
 
-    train_nums = np.zeros(25)
-    val_nums = np.zeros(25)
-    test_nums = np.zeros(25)
+    train_nums = np.zeros(25, dtype=np.int)
+    val_nums = np.zeros(25, dtype=np.int)
+    test_nums = np.zeros(25, dtype=np.int)
 
     for i in range(len(train_labels)):
         labels = train_labels[i].split(",")
