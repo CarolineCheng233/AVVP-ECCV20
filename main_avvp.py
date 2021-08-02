@@ -117,24 +117,24 @@ def eval(model, val_loader, set):
             SO_av = SO_a * SO_v
 
             # segment-level F1 scores
-            f_a, f_v, f, f_av = segment_level_by_cat(SO_a, SO_v, SO_av, GT_a, GT_v, GT_av)
+            f_a, f_v, f, f_av = segment_level(SO_a, SO_v, SO_av, GT_a, GT_v, GT_av)
             F_seg_a.append(f_a)
             F_seg_v.append(f_v)
             F_seg.append(f)
             F_seg_av.append(f_av)
 
             # event-level F1 scores
-            f_a, f_v, f, f_av = event_level_by_cat(SO_a, SO_v, SO_av, GT_a, GT_v, GT_av)
+            f_a, f_v, f, f_av = event_level(SO_a, SO_v, SO_av, GT_a, GT_v, GT_av)
             F_event_a.append(f_a)
             F_event_v.append(f_v)
             F_event.append(f)
             F_event_av.append(f_av)
 
-    # avg_type = print_overall_metric(F_seg_a, F_seg_v, F_seg, F_seg_av, F_event_a, F_event_v, F_event, F_event_av)
+    avg_type = print_overall_metric(F_seg_a, F_seg_v, F_seg, F_seg_av, F_event_a, F_event_v, F_event, F_event_av)
     # write_conf(F_seg_a, F_seg_v, F_seg, F_seg_av, F_event_a, F_event_v, F_event, F_event_av,
     #            "data/all_confidence.txt", "data/AVVP_test_pd.csv")
-    avg_type = log_metric_by_cat_mod(F_seg_a, F_seg_v, F_seg, F_seg_av, F_event_a, F_event_v, F_event, F_event_av,
-                                     "data/cat_confidence_by_cat_mod.txt")
+    # avg_type = log_metric_by_cat_mod(F_seg_a, F_seg_v, F_seg, F_seg_av, F_event_a, F_event_v, F_event, F_event_av,
+    #                                  "data/cat_confidence_by_cat_mod.txt")
 
     return avg_type
 
