@@ -140,28 +140,86 @@ def event_num_modality_for_each_video_distribution():
     audio_filenames = audio["filename"]
     visual_filenames = visual["filename"]
 
+    audio_dict = Counter(audio_filenames)
+    visual_dict = Counter(visual_filenames)
+
     audio_nums = np.zeros(20, dtype=np.int)
     visual_nums = np.zeros(20, dtype=np.int)
 
+    max_num = 0
+    for file in audio_dict:
+        num = audio_dict[file]
+        audio_nums[num - 1] += 1
+        max_num = max(num, max_num)
+    for file in visual_dict:
+        num = visual_dict[file]
+        visual_nums[num - 1] += 1
+        max_num = max(num, max_num)
+
+    audio_nums = audio_nums[:max_num]
+    visual_nums = visual_nums[:max_num]
+    number = np.arange(max_num) + 1
+
+    statics = ["\t".join([str(n), ",".join([str(a), str(v), str(a + v)])])
+               for n, a, v in zip(number, audio_nums, visual_nums)]
+    with open("../data/event_num_modal_distribution.txt", "w", encoding="utf-8") as f:
+        f.write("event_number\taudio,visual,total\n")
+        f.write("\n".join(statics))
 
 
-    # audio_nums = np.zeros(25, dtype=np.int)
-    # visual_nums = np.zeros(25, dtype=np.int)
-    #
-    # for i in range(len(audio_labels)):
-    #     label = audio_labels[i]
-    #     audio_nums[cate2idx[label]] += 1
-    #
-    # for i in range(len(visual_labels)):
-    #     label = visual_labels[i]
-    #     visual_nums[cate2idx[label]] += 1
-    #
-    # statics = ["\t".join([c, ",".join([str(au), str(vi), str(au + vi)])])
-    #            for c, au, vi in zip(categories, audio_nums, visual_nums)]
-    # with open("../data/num_of_event_cate_for_modal.txt", "w", encoding="utf-8") as f:
-    #     f.write("category\taudio,visual,total\n")
-    #     f.write("\n".join(statics))
+def duration_of_categories_for_modality_distribution():
+    # 对于每个模态每种类别的事件发生的平均长度、标准差
+    categories, cate2idx = read_categories()
+
+    audio = pd.read_csv("../data/AVVP_eval_audio.csv", header=0, sep='\t')
+    visual = pd.read_csv("../data/AVVP_eval_visual.csv", header=0, sep='\t')
+
+    audio_labels = audio["event_labels"]
+    visual_labels = visual["event_labels"]
+
+    audio_onset = audio["onset"]
+    visual_onset = visual["onset"]
+    audio_offset = audio["offset"]
+    visual_offset = visual["offset"]
+
+    audio_duration = audio_offset - audio_onset
+    visual_duration = visual_offset - visual_onset
+
+    audio_event_duration = [None] * 25
+    visual_event_duration = [None] * 25
+
+    for i, d in enumerate(audio_duration):
+        label = cate2idx[audio_labels[i]]
+        if audio_event_duration[label] is None:
+            audio_event_duration[label] = []
+        audio_event_duration[label].append(d)
+    for i, d in enumerate(visual_duration):
+        label = cate2idx[visual_labels[i]]
+        if visual_event_duration[label] is None:
+            visual_event_duration[label] = []
+        visual_event_duration[label].append(d)
+
+    audio_mean = []
+    audio_std = []
+    visual_mean = []
+    visual_std = []
+    for cat in range(25):
+        audio_mean.append(np.mean(np.array(audio_event_duration[cat])))
+        audio_std.append(np.std(np.array(audio_event_duration[cat])))
+        visual_mean.append(np.mean(np.array(visual_event_duration[cat])))
+        visual_std.append(np.std(np.array(visual_event_duration[cat])))
+    audio_mean = np.array(audio_mean)
+    visual_mean = np.array(visual_mean)
+    audio_std = np.array(audio_std)
+    visual_std = np.array(visual_std)
+
+    statics = ["\t".join([str(c), ",".join([str(round(aum, 2)), str(round(vim, 2))]),
+                          ",".join([str(round(aus, 2)), str(round(vis, 2))])])
+               for c, aum, aus, vim, vis in zip(categories, audio_mean, audio_std, visual_mean, visual_std)]
+    with open("../data/cate_duration_for_modality_distribution.txt", "w", encoding="utf-8") as f:
+        f.write("category\taudio_mean,visual_mean\taudio_std,visual_std\n")
+        f.write("\n".join(statics))
 
 
 if __name__ == '__main__':
-    event_cate_num_for_each_video_distribution()
+    duration_of_categories_for_modality_distribution()
