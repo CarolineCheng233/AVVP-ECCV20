@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from collections import Counter
 
 
 # data/categories.txt
@@ -128,6 +129,38 @@ def event_cate_num_for_each_video_distribution():
     with open("../data/event_cate_num_for_each_video_distribution.txt", 'w', encoding='utf-8') as f:
         f.write("event_cate_number\ttrain,val,test,total\n")
         f.write("\n".join(statics))
+
+
+def event_num_modality_for_each_video_distribution():
+    # 验证集+测试集每种模态每个视频发生的事件个数分布（横坐标：事件个数（分组audio和visual），纵坐标每个事件个数的视频数）
+    # categories, cate2idx = read_categories()
+    audio = pd.read_csv("../data/AVVP_eval_audio.csv", header=0, sep='\t')
+    visual = pd.read_csv("../data/AVVP_eval_visual.csv", header=0, sep='\t')
+
+    audio_filenames = audio["filename"]
+    visual_filenames = visual["filename"]
+
+    audio_nums = np.zeros(20, dtype=np.int)
+    visual_nums = np.zeros(20, dtype=np.int)
+
+
+
+    # audio_nums = np.zeros(25, dtype=np.int)
+    # visual_nums = np.zeros(25, dtype=np.int)
+    #
+    # for i in range(len(audio_labels)):
+    #     label = audio_labels[i]
+    #     audio_nums[cate2idx[label]] += 1
+    #
+    # for i in range(len(visual_labels)):
+    #     label = visual_labels[i]
+    #     visual_nums[cate2idx[label]] += 1
+    #
+    # statics = ["\t".join([c, ",".join([str(au), str(vi), str(au + vi)])])
+    #            for c, au, vi in zip(categories, audio_nums, visual_nums)]
+    # with open("../data/num_of_event_cate_for_modal.txt", "w", encoding="utf-8") as f:
+    #     f.write("category\taudio,visual,total\n")
+    #     f.write("\n".join(statics))
 
 
 if __name__ == '__main__':
