@@ -2,6 +2,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+def read_categories():
+    categories = []
+    with open("../data/categories.txt", "r", encoding='utf-8') as f:
+        for line in f:
+            cate = line.strip().split("\t")[0]
+            categories.append(cate)
+    return np.array(categories)
+
+
 def read_num_of_event_cate():
     train_arr = []
     val_arr = []
@@ -13,10 +22,10 @@ def read_num_of_event_cate():
                 continue
             cate, num = line.strip().split("\t")
             train, val, test, total = num.split(",")
-            train_arr.append(train)
-            val_arr.append(val)
-            test_arr.append(test)
-            total_arr.append(total)
+            train_arr.append(int(train))
+            val_arr.append(int(val))
+            test_arr.append(int(test))
+            total_arr.append(int(total))
     train_arr = np.array(train_arr).reshape(-1, 1)
     val_arr = np.array(val_arr).reshape(-1, 1)
     test_arr = np.array(test_arr).reshape(-1, 1)
@@ -25,16 +34,27 @@ def read_num_of_event_cate():
            np.array(["train", "val", "test", "total"])
 
 
-def read_categories():
-    categories = []
-    with open("../data/categories.txt", "r", encoding='utf-8') as f:
-        for line in f:
-            cate = line.strip().split("\t")[0]
-            categories.append(cate)
-    return np.array(categories)
+def read_num_of_event_cate_for_modal():
+    audio_arr = []
+    visual_arr = []
+    total_arr = []
+    with open("data/num_of_event_cate_for_modal.txt", 'r', encoding='utf-8') as f:
+        for i, line in enumerate(f):
+            if i == 0:
+                continue
+            cate, num = line.strip().split("\t")
+            audio, visual, total = num.split(",")
+            audio_arr.append(int(audio))
+            visual_arr.append(int(visual))
+            total_arr.append(int(total))
+    audio_arr = np.array(audio_arr).reshape(-1, 1)
+    visual_arr = np.array(visual_arr).reshape(-1, 1)
+    total_arr = np.array(total_arr).reshape(-1, 1)
+    return np.concatenate((audio_arr, visual_arr, total_arr), axis=1), \
+           np.array(["audio", "visual", "total"])
 
 
-def draw_histogram_by_cat(label, number, names, show_name_per_num=1):
+def draw_histogram(label, number, names, show_name_per_num=1):
     # number是二维数组，len(number)=len(label)，分组显示，legend和names个数是数组的个数
     assert len(label) == len(number), 'unequal label and number'
     length = len(label)
@@ -59,4 +79,4 @@ def draw_histogram_by_cat(label, number, names, show_name_per_num=1):
 if __name__ == '__main__':
     array, names = read_num_of_event_cate()
     label = read_categories()
-    draw_histogram_by_cat(label, array, names)
+    draw_histogram(label, array, names)

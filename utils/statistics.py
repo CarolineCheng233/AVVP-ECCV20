@@ -75,9 +75,60 @@ def number_of_event_categories_for_modality():
     statics = ["\t".join([c, ",".join([str(au), str(vi), str(au + vi)])])
                for c, au, vi in zip(categories, audio_nums, visual_nums)]
     with open("../data/num_of_event_cate_for_modal.txt", "w", encoding="utf-8") as f:
-        f.write("category\taudio,visual\n")
+        f.write("category\taudio,visual,total\n")
+        f.write("\n".join(statics))
+
+
+def event_cate_num_for_each_video_distribution():
+    # 训练集、验证集、测试集、以及整体视频中每个视频发生了多少种事件的统计（横坐标：发生事件种数，纵坐标：视频个数）
+    # categories, cate2idx = read_categories()
+
+    train_labels = pd.read_csv("../data/AVVP_train.csv", header=0, sep='\t')["event_labels"]
+    val_labels = pd.read_csv("../data/AVVP_val_pd.csv", header=0, sep='\t')["event_labels"]
+    test_labels = pd.read_csv("../data/AVVP_test_pd.csv", header=0, sep='\t')["event_labels"]
+
+    train_nums = [0] * 10
+    val_nums = [0] * 10
+    test_nums = [0] * 10
+    # total_nums = [0] * 10
+
+    train_max = 0
+    val_max = 0
+    test_max = 0
+    # total_max = 0
+
+    for labels in train_labels:
+        num = len(labels.split(","))
+        train_max = max(train_max, num)
+        # total_max = max(total_max, num)
+        train_nums[num - 1] += 1
+        # total_nums[num - 1] += 1
+    for labels in val_labels:
+        num = len(labels.split(","))
+        val_max = max(val_max, num)
+        # total_max = max(total_max, num)
+        val_nums[num - 1] += 1
+        # total_nums[num - 1] += 1
+    for labels in test_labels:
+        num = len(labels.split(","))
+        test_max = max(test_max, num)
+        # total_max = max(total_max, num)
+        test_nums[num - 1] += 1
+        # total_nums[num - 1] += 1
+
+    total_max = max(train_max, val_max, test_max)
+    nums = np.arange(total_max) + 1
+    train_nums = np.array(train_nums, dtype=np.int)[:total_max]
+    val_nums = np.array(val_nums, dtype=np.int)[:total_max]
+    test_nums = np.array(test_nums, dtype=np.int)[:total_max]
+    print(f"total_max: {total_max}\ntrain_max: {train_max}\nval_max: {val_max}\ntest_max: {test_max}")
+
+    statics = ["\t".join([str(c), ",".join([str(tr), str(va), str(te), str(tr + va + te)])])
+               for c, tr, va, te in zip(nums, train_nums, val_nums, test_nums)]
+    with open("../data/event_cate_num_for_each_video_distribution.txt", 'w', encoding='utf-8') as f:
+        f.write("event_cate_number\ttrain,val,test,total\n")
         f.write("\n".join(statics))
 
 
 if __name__ == '__main__':
-    number_of_event_categories_for_modality()
+    event_cate_num_for_each_video_distribution()
