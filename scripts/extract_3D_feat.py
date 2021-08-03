@@ -18,6 +18,7 @@ import torchvision
 
 C, H, W = 3, 112, 112
 
+
 def extract_feats(params, model, load_img):
     global C, H, W
     model.eval()

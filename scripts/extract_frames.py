@@ -4,6 +4,7 @@ import os
 import argparse
 import glob
 
+
 def extract_frames(video, dst):
     command1 = 'ffmpeg '
     command1 += '-i ' + video + " "
@@ -13,8 +14,8 @@ def extract_frames(video, dst):
     print(command1)
     #    print command1
     os.system(command1)
-
     return
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

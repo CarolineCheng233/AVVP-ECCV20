@@ -14,6 +14,7 @@ from pretrainedmodels import utils
 
 C, H, W = 3, 224, 224
 
+
 def extract_feats(params, model, load_image_fn):
     global C, H, W
     model.eval()

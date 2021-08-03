@@ -1,8 +1,9 @@
 import os
 import pandas as pd
 
+
 def download(set, name, t_seg):
-    #label = label.replace(" ", "_")  # avoid space in folder name
+    # label = label.replace(" ", "_")  # avoid space in folder name
     path_data = os.path.join(set, "video")
     print(path_data)
     if not os.path.exists(path_data):
@@ -23,8 +24,8 @@ def download(set, name, t_seg):
     command1 += "-o " + filename_full_video + " "
     command1 += "-f best "
 
-    #command1 += '-q '  # print no log
-    #print command1
+    # command1 += '-q '  # print no log
+    # print command1
     os.system(command1)
 
     t_start, t_end = t_seg
@@ -42,17 +43,17 @@ def download(set, name, t_seg):
     command2 += filename + ' '
     command2 += '-y '  # overwrite without asking
     command2 += '-loglevel -8 '  # print no log
-    #print(command2)
+    # print(command2)
     os.system(command2)
     try:
         os.remove(filename_full_video)
     except:
         return
 
-    print ("finish the video as: " + filename)
+    print("finish the video as: " + filename)
 
 
-##%% read the label encoding
+## %% read the label encoding
 # filename = "../doc/class_labels_indices.csv"
 # lines = [x.strip() for x in open(filename, 'r')][1:]
 # label_encode = {}

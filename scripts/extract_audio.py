@@ -3,9 +3,9 @@ import moviepy
 from moviepy.audio.AudioClip import AudioArrayClip
 from moviepy.editor import VideoFileClip
 
-video_pth =  "data/LLP_dataset/video"
+video_pth = "data/LLP_dataset/video"
 sound_list = os.listdir(video_pth)
-save_pth =  "data/LLP_dataset/audio"
+save_pth = "data/LLP_dataset/audio"
 
 for audio_id in sound_list:
     name = os.path.join(video_pth, audio_id)
