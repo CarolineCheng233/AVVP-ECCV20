@@ -28,10 +28,10 @@ def filter_videos(file, mids, mid2class, wfile):
     for i, v in enumerate(videos):
         labels = set(positive_labels[i][1:-1].split(","))
         if len(mids & labels) > 0:
-            mids = list(mids & labels)
+            labels = list(mids & labels)
             classes = list()
-            for m in mids:
-                classes.append(mid2class[m])
+            for l in labels:
+                classes.append(mid2class[l])
             name = v + "_" + str(start_seconds[i]) + "_" + str(end_seconds[i])
             remained_videos.append("\t".join([name, ",".join(classes)]))
 
@@ -42,4 +42,5 @@ def filter_videos(file, mids, mid2class, wfile):
 
 if __name__ == '__main__':
     mid, mid2class = read_cates()
-    filter_videos("../audioset/eval_segments.csv", mid, mid2class, "../audioset/AVVP_addi_eval.csv")
+    filter_videos("../audioset/unbalanced_train_segments.csv", mid, mid2class,
+                  "../audioset/AVVP_addi_unbalanced_train.csv")
