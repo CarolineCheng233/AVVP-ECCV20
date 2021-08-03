@@ -1,4 +1,5 @@
 import numpy as np
+# from sklearn.metrics import confusion_matrix
 
 
 def Precision(X_pre, X_gt):
@@ -353,6 +354,35 @@ def segment_level_by_cat(SO_a, SO_v, SO_av, GT_a, GT_v, GT_av):
             F_av[ii] = 2 * TP_av[ii] / (2 * TP_av[ii] + (FN_av + FP_av)[ii])
 
     return F_a, F_v, F, F_av
+
+
+def count_confusion(pred, label):
+    # pred.shape = (25,)
+    matrix = np.zeros((26, 26))
+    pidxes = pred != 0
+    lidxes = label != 0
+
+    if len(pidxes) != 0 and len(lidxes) != 0:
+        for i in pidxes:
+            for j in lidxes:
+                matrix[i][j] += 1
+    elif len(pidxes) != 0:
+        for i in pidxes:
+            matrix[i][25] += 1
+    elif len(lidxes) != 0:
+        for j in lidxes:
+            matrix[25][j] += 1
+    return matrix
+
+
+def confusion_matrix(SO_a, SO_v, SO_av, GT_a, GT_v, GT_av):
+    # SO_a.shape = [25, 10]
+    audio_matrix = np.zeros((26, 26))
+    visual_matrix = np.zeros((26, 26))
+    for i in range(10):
+        audio_matrix += count_confusion(SO_a[:, i] + SO_av[:, i], GT_a[:, i] + GT_av[:, i])
+        visual_matrix += count_confusion(SO_v[:, i] + SO_av[:, i], GT_v[:, i] + GT_av[:, i])
+    return audio_matrix, visual_matrix
 
 
 def to_vec(start, end):

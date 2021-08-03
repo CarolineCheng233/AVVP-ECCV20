@@ -266,3 +266,8 @@ def log_metric_by_cat_mod(F_seg_a, F_seg_v, F_seg, F_seg_av, F_event_a, F_event_
         f.write("\n".join(cat_score))
 
     return scores
+
+
+def log_confusion_matrix(audio_matrix, visual_matrix, audio_file, visual_file):
+    np.save(audio_file, audio_matrix)
+    np.save(visual_file, visual_matrix)

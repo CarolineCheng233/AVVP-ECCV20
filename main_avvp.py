@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 from dataloader import *
 from nets.net_audiovisual import MMIL_Net
-from utils.eval_metrics import segment_level, event_level, event_level_by_cat, segment_level_by_cat
+from utils.eval_metrics import segment_level, event_level, event_level_by_cat, segment_level_by_cat, confusion_matrix
 from utils.log_confidence import *
 import pandas as pd
 
@@ -61,6 +61,9 @@ def eval(model, val_loader, set):
     F_event = []
     F_event_av = []
 
+    audio_matrix = np.zeros((26, 26))
+    visual_matrix = np.zeros((26, 26))
+
     with torch.no_grad():
         for batch_idx, sample in enumerate(val_loader):
             audio, video, video_st, target = sample['audio'].to('cuda'), sample['video_s'].to('cuda'),\
@@ -87,7 +90,6 @@ def eval(model, val_loader, set):
             num = len(filenames)
             if num > 0:
                 for i in range(num):
-
                     x1 = int(onsets[df_vid_a.index[i]])
                     x2 = int(offsets[df_vid_a.index[i]])
                     event = events[df_vid_a.index[i]]
@@ -130,11 +132,16 @@ def eval(model, val_loader, set):
             F_event.append(f)
             F_event_av.append(f_av)
 
+            auma, vima = confusion_matrix(SO_a, SO_v, SO_av, GT_a, GT_v, GT_av)
+            audio_matrix += auma
+            visual_matrix += vima
+
     avg_type = print_overall_metric(F_seg_a, F_seg_v, F_seg, F_seg_av, F_event_a, F_event_v, F_event, F_event_av)
     # write_conf(F_seg_a, F_seg_v, F_seg, F_seg_av, F_event_a, F_event_v, F_event, F_event_av,
     #            "data/all_confidence.txt", "data/AVVP_test_pd.csv")
     # avg_type = log_metric_by_cat_mod(F_seg_a, F_seg_v, F_seg, F_seg_av, F_event_a, F_event_v, F_event, F_event_av,
     #                                  "data/cat_confidence_by_cat_mod.txt")
+    log_confusion_matrix(audio_matrix, visual_matrix, "data/audio_matrix.npy", "data/visual_matrix.npy")
 
     return avg_type
 
