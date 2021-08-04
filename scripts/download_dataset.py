@@ -17,7 +17,7 @@ def download(path_data, name, t_seg):
 
     if os.path.exists(filename):
         print("already exists, skip")
-        return
+        return 0
 
     command1 = 'youtube-dl --ignore-config '
     command1 += link + " "
@@ -48,9 +48,9 @@ def download(path_data, name, t_seg):
     try:
         os.remove(filename_full_video)
     except:
-        return
+        return -1
 
-    print("finish the video as: " + filename)
+    return 1
 
 
 def upload(filename):
@@ -75,8 +75,8 @@ def multithread_process(filenames):
         steps = row[11:].split("_")
         t_start = float(steps[1])
         t_end = t_start + 10
-        download(set, name, (t_start, t_end))
-        if osp.exists(osp.join(set, name) + ".mp4"):
+        state = download(set, name, (t_start, t_end))
+        if state == 1 and osp.exists(osp.join(set, name) + ".mp4"):
             stored_files.append(name + ".mp4")
             if len(stored_files) == 100:
                 upload(stored_files)
