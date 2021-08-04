@@ -16,7 +16,7 @@ def read_num_of_event_cate():
     val_arr = []
     test_arr = []
     total_arr = []
-    with open("../data/num_of_event_cate.txt", 'r', encoding='utf-8') as f:
+    with open("../statistics/num_of_event_cate.txt", 'r', encoding='utf-8') as f:
         for i, line in enumerate(f):
             if i == 0:
                 continue

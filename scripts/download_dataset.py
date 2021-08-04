@@ -18,7 +18,7 @@ def download(set, name, t_seg):
         print("already exists, skip")
         return
 
-    print( "download the whole video for: [%s] - [%s]" % (set, name))
+    print("download the whole video for: [%s] - [%s]" % (set, name))
     command1 = 'youtube-dl --ignore-config '
     command1 += link + " "
     command1 += "-o " + filename_full_video + " "
@@ -66,7 +66,7 @@ def download(set, name, t_seg):
 #
 
 # %% read the video trim time indices
-filename_source = "data/AVVP_dataset_full.csv"  #
+filename_source = "data/audioset_full_filter_AVVP_speech.csv"  #
 set = "data/LLP_dataset"
 df = pd.read_csv(filename_source, header=0, sep='\t')
 filenames = df["filename"]
