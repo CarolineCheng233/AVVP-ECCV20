@@ -1,11 +1,12 @@
 import os
+import os.path as osp
 import pandas as pd
+import time
+from multiprocessing import Process
+import paramiko
 
 
-def download(set, name, t_seg):
-    # label = label.replace(" ", "_")  # avoid space in folder name
-    path_data = os.path.join(set, "video")
-    print(path_data)
+def download(path_data, name, t_seg):
     if not os.path.exists(path_data):
         os.makedirs(path_data)
     link_prefix = "https://www.youtube.com/watch?v="
@@ -18,7 +19,6 @@ def download(set, name, t_seg):
         print("already exists, skip")
         return
 
-    print("download the whole video for: [%s] - [%s]" % (set, name))
     command1 = 'youtube-dl --ignore-config '
     command1 += link + " "
     command1 += "-o " + filename_full_video + " "
@@ -53,35 +53,53 @@ def download(set, name, t_seg):
     print("finish the video as: " + filename)
 
 
-## %% read the label encoding
-# filename = "../doc/class_labels_indices.csv"
-# lines = [x.strip() for x in open(filename, 'r')][1:]
-# label_encode = {}
-# for l in lines:
-#    l = l[l.find(",")+1:]
-#    encode = l.split(",")[0]
-#    label_encode[ l[len(encode)+2:-1] ] = encode
-#
-#
-#
+def upload(filename):
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect(hostname="210.28.134.151", username="chenghaoyue", password="passwdCHY123", port=12022)
+    sftp = ssh.open_sftp()
+    for file in filename:
+        localpath = "data/LLP_dataset/video/" + file
+        remotepath = "/home/chenghaoyue/data2/projects/AVVP-ECCV20/data/LLP_dataset/video/" + file
+        sftp.put(localpath, remotepath, callback=None)
+    ssh.close()
 
-# %% read the video trim time indices
-filename_source = "data/audioset_full_filter_AVVP_speech.csv"  #
-set = "data/LLP_dataset"
-df = pd.read_csv(filename_source, header=0, sep='\t')
-filenames = df["filename"]
-length = len(filenames)
-print(length)
-names = []
-segments = {}
-for i in range(length):
-    row = df.loc[i, :]
-    name = row[0][:11]
-    steps = row[0][11:].split("_")
-    t_start = float(steps[1])
-    t_end = t_start + 10
-    segments[name] = (t_start, t_end)
-    download(set, name, segments[name])
-    names.append(name)
-print(len(segments))
 
+def multithread_process(filenames):
+    set = "data/LLP_dataset/video"
+    length = len(filenames)
+    stored_files = list()
+    for i in range(length):
+        row = filenames[i]
+        name = row[:11]
+        steps = row[11:].split("_")
+        t_start = float(steps[1])
+        t_end = t_start + 10
+        download(set, name, (t_start, t_end))
+        if osp.exists(osp.join(set, name) + ".mp4"):
+            stored_files.append(name + ".mp4")
+            if len(stored_files) == 100:
+                upload(stored_files)
+                stored_files = list()
+    if len(stored_files) > 0:
+        upload(stored_files)
+
+
+if __name__ == '__main__':
+    filename_source = "data/audioset_remained.csv"
+    filenames = list(pd.read_csv(filename_source, header=0, sep='\t')["filename"].values)
+    length = len(filenames)
+    print(length)
+    procs = 30
+    length_per_process = (length + procs - 1) // procs
+    start = time.time()
+    proc_list = list()
+    for i in range(procs):
+        proc = Process(target=multithread_process,
+                       args=(filenames[length_per_process * i: length_per_process * (i + 1)],))
+        proc.start()
+        proc_list.append(proc)
+    for p in proc_list:
+        p.join()
+    end = time.time()
+    print((end - start) / 3600.)
