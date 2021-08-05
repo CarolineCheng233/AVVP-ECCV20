@@ -63,7 +63,7 @@ if __name__ == '__main__':
     parser.add_argument("--gpu", dest='gpu', type=str, default='9',
                         help='Set CUDA_VISIBLE_DEVICES environment variable, optional')
     parser.add_argument("--output_dir", dest='output_dir', type=str,
-                        default='data/LLP_dataset/feats/r2plus1d_18', help='directory to store features')
+                        default='data/feats/r2plus1d_18', help='directory to store features')
     parser.add_argument("--n_frame_steps", dest='n_frame_steps', type=int, default=80,
                         help='how many frames to sampler per video')
 
