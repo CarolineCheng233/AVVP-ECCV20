@@ -120,11 +120,14 @@ def read_event_duration_for_modal():
     df = pd.read_csv("data/cate_duration_for_modality_distribution.txt", header=0, sep="\t")
     audio = df["audio_mean,audio_std"].values
     visual = df["visual_mean,visual_std"].values
+    total = df["total_mean,total_std"].values
 
     audio_mean = list()
     audio_std = list()
     visual_mean = list()
     visual_std = list()
+    total_mean = list()
+    total_std = list()
     for a in audio:
         m, s = a.split(',')
         audio_mean.append(float(m))
@@ -133,8 +136,13 @@ def read_event_duration_for_modal():
         m, s = v.split(',')
         visual_mean.append(float(m))
         visual_std.append(float(s))
+    for t in total:
+        m, s = t.split(',')
+        total_mean.append(float(m))
+        total_std.append(float(s))
     return np.array(audio_mean), np.array(audio_std), \
-           np.array(visual_mean), np.array(visual_std)
+           np.array(visual_mean), np.array(visual_std), \
+           np.array(total_mean), np.array(total_std)
 
 
 def draw_histogram(label, number, names, show_name_per_num=1):
@@ -148,6 +156,28 @@ def draw_histogram(label, number, names, show_name_per_num=1):
     x = np.arange(length)
     for g in range(groups):  # 总宽度0.8
         plt.bar(x + ew * g, number[:, g], ew)
+    plt.xticks(np.arange(length),
+               label,
+               fontsize=10,
+               fontweight='bold')
+    fig.autofmt_xdate(rotation=45)
+    fig.tight_layout()
+    plt.grid(axis='y', zorder=1)
+    plt.legend(names)
+    plt.show()
+
+
+def draw_mean_std(label, number, names, show_name_per_num=1):
+    # number三维数组,label是横坐标,number.shape是横坐标数*组数*2(mean和std),names的长度是组数,即每组的名字
+    assert len(label) == len(number), 'unequal label and number'
+    length = len(label)
+    fig = plt.figure()
+    label = [cat if i % show_name_per_num == 0 else '' for i, cat in enumerate(label)]
+    groups = number.shape[1]  # 3,audio,visual,total
+    ew = 0.8 / groups
+    x = np.arange(length)
+    for g in range(groups):  # 总宽度0.8
+        plt.bar(x + ew * g, number[:, g, 0], width=ew, yerr=number[:, g, 1])  # 添加errorbar
     plt.xticks(np.arange(length),
                label,
                fontsize=10,
