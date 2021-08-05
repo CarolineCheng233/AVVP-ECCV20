@@ -140,9 +140,12 @@ def read_event_duration_for_modal():
         m, s = t.split(',')
         total_mean.append(float(m))
         total_std.append(float(s))
-    return np.array(audio_mean), np.array(audio_std), \
-           np.array(visual_mean), np.array(visual_std), \
-           np.array(total_mean), np.array(total_std)
+    audio = np.concatenate((np.array(audio_mean).reshape((-1, 1, 1)), np.array(audio_std).reshape((-1, 1, 1))), axis=2)
+    visual = np.concatenate((np.array(visual_mean).reshape((-1, 1, 1)), np.array(visual_std).reshape((-1, 1, 1))), axis=2)
+    total = np.concatenate((np.array(total_mean).reshape((-1, 1, 1)), np.array(total_std).reshape((-1, 1, 1))), axis=2)
+    array = np.concatenate((audio, visual, total), axis=1)
+
+    return array, np.array(["audio", "visual", "total"])
 
 
 def draw_histogram(label, number, names, show_name_per_num=1):
@@ -190,6 +193,6 @@ def draw_mean_std(label, number, names, show_name_per_num=1):
 
 
 if __name__ == '__main__':
-    array, names = read_num_of_event_cate()
+    array, names = read_event_duration_for_modal()
     label = read_categories()
-    draw_histogram(label, array, names)
+    draw_mean_std(label, array, names)
