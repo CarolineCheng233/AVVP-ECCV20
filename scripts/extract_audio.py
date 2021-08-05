@@ -28,5 +28,5 @@ if __name__ == '__main__':
     parser.add_argument('--video_path', dest='video_path', type=str, default='data/LLP_dataset/video')
     args = parser.parse_args()
 
-    sound_list = os.listdir(args.video_pth)
+    sound_list = os.listdir(args.video_path)
     extract(sound_list, args.video_path, args.out_dir)
