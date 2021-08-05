@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 
 
 def read_categories():
@@ -34,6 +35,18 @@ def read_num_of_event_cate():
            np.array(["train", "val", "test", "total"])
 
 
+def read_num_of_event_cate_audioset_full():
+    total_arr = []
+    with open("data/num_of_event_cate_audioset_full.txt", 'r', encoding='utf-8') as f:
+        for i, line in enumerate(f):
+            if i == 0:
+                continue
+            cate, num = line.strip().split("\t")
+            total_arr.append(int(num))
+    total_arr = np.array(total_arr).reshape(-1, 1)
+    return total_arr, np.array(["total"])
+
+
 def read_num_of_event_cate_for_modal():
     audio_arr = []
     visual_arr = []
@@ -52,6 +65,76 @@ def read_num_of_event_cate_for_modal():
     total_arr = np.array(total_arr).reshape(-1, 1)
     return np.concatenate((audio_arr, visual_arr, total_arr), axis=1), \
            np.array(["audio", "visual", "total"])
+
+
+def read_event_num_modal_distribution():
+    # 训练集、验证集、测试集、以及整体视频中每个模态发生事件数量的分布
+    audio_arr = []
+    visual_arr = []
+    total_arr = []
+    length = 0
+    with open("data/event_num_modal_distribution.txt", 'r', encoding='utf-8') as f:
+        for i, line in enumerate(f):
+            if i == 0:
+                continue
+            length += 1
+            cate, num = line.strip().split("\t")
+            audio, visual, total = num.split(",")
+            audio_arr.append(int(audio))
+            visual_arr.append(int(visual))
+            total_arr.append(int(total))
+    audio_arr = np.array(audio_arr).reshape(-1, 1)
+    visual_arr = np.array(visual_arr).reshape(-1, 1)
+    total_arr = np.array(total_arr).reshape(-1, 1)
+    return np.concatenate((audio_arr, visual_arr, total_arr), axis=1), \
+           np.array(["audio", "visual", "total"]), np.arange(length) + 1
+
+
+def read_event_cate_num_distribution():
+    train_arr = []
+    val_arr = []
+    test_arr = []
+    total_arr = []
+    length = 0
+    with open("data/event_cate_num_for_each_video_distribution.txt", 'r', encoding='utf-8') as f:
+        for i, line in enumerate(f):
+            if i == 0:
+                continue
+            length += 1
+            cate, num = line.strip().split("\t")
+            train, val, test, total = num.split(",")
+            train_arr.append(int(train))
+            val_arr.append(int(val))
+            test_arr.append(int(test))
+            total_arr.append(int(total))
+    train_arr = np.array(train_arr).reshape(-1, 1)
+    val_arr = np.array(val_arr).reshape(-1, 1)
+    test_arr = np.array(test_arr).reshape(-1, 1)
+    total_arr = np.array(total_arr).reshape(-1, 1)
+    return np.concatenate((train_arr, val_arr, test_arr, total_arr), axis=1), \
+           np.array(["train", "val", "test", "total"]), np.arange(length) + 1
+
+
+def read_event_duration_for_modal():
+    # 验证集+测试集、整体视频中每个模态每种类型的事件发生的平均长度、方差
+    df = pd.read_csv("data/cate_duration_for_modality_distribution.txt", header=0, sep="\t")
+    audio = df["audio_mean,audio_std"].values
+    visual = df["visual_mean,visual_std"].values
+
+    audio_mean = list()
+    audio_std = list()
+    visual_mean = list()
+    visual_std = list()
+    for a in audio:
+        m, s = a.split(',')
+        audio_mean.append(float(m))
+        audio_std.append(float(s))
+    for v in visual:
+        m, s = v.split(',')
+        visual_mean.append(float(m))
+        visual_std.append(float(s))
+    return np.array(audio_mean), np.array(audio_std), \
+           np.array(visual_mean), np.array(visual_std)
 
 
 def draw_histogram(label, number, names, show_name_per_num=1):

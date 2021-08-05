@@ -41,7 +41,6 @@ def extract_feats(params, model, load_image_fn):
             img = load_image_fn(image_list[iImg])
             images[iImg] = img
 
-
         with torch.no_grad():
             fc_feats = model(images.cuda()).squeeze()
         img_feats = fc_feats.cpu().numpy()

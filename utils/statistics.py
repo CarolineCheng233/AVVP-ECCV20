@@ -237,23 +237,32 @@ def duration_of_categories_for_modality_distribution():
     audio_std = []
     visual_mean = []
     visual_std = []
+    total_mean = []
+    total_std = []
     for cat in range(25):
         audio_mean.append(np.mean(np.array(audio_event_duration[cat])))
         audio_std.append(np.std(np.array(audio_event_duration[cat])))
         visual_mean.append(np.mean(np.array(visual_event_duration[cat])))
         visual_std.append(np.std(np.array(visual_event_duration[cat])))
+        total_mean.append(np.mean(np.array(audio_event_duration[cat] + visual_event_duration[cat])))
+        total_std.append(np.std(np.array(audio_event_duration[cat] + visual_event_duration[cat])))
     audio_mean = np.array(audio_mean)
     visual_mean = np.array(visual_mean)
     audio_std = np.array(audio_std)
     visual_std = np.array(visual_std)
+    total_mean = np.array(total_mean)
+    total_std = np.array(total_std)
 
-    statics = ["\t".join([str(c), ",".join([str(round(aum, 2)), str(round(vim, 2))]),
-                          ",".join([str(round(aus, 2)), str(round(vis, 2))])])
-               for c, aum, aus, vim, vis in zip(categories, audio_mean, audio_std, visual_mean, visual_std)]
+    statics = ["\t".join([str(c), ",".join([str(round(aum, 2)), str(round(aus, 2))]),
+                          ",".join([str(round(vim, 2)), str(round(vis, 2))]),
+                          ",".join([str(round(tom, 2)), str(round(tos, 2))])])
+               for c, aum, aus, vim, vis, tom, tos in zip(categories, audio_mean, audio_std,
+                                                visual_mean, visual_std, total_mean, total_std)]
     with open("../statistics/cate_duration_for_modality_distribution.txt", "w", encoding="utf-8") as f:
-        f.write("category\taudio_mean,visual_mean\taudio_std,visual_std\n")
+        f.write("category\taudio_mean,audio_std\tvisual_mean,visual_std\ttotal_mean,total_std\n")
         f.write("\n".join(statics))
 
 
 if __name__ == '__main__':
-    event_cate_num_for_each_video_distribution_full("../data/audioset_remained.csv")
+    # event_cate_num_for_each_video_distribution_full("../data/audioset_remained.csv")
+    duration_of_categories_for_modality_distribution()
