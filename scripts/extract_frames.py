@@ -3,6 +3,7 @@ import subprocess
 import os
 import argparse
 import glob
+from mmcv import ProgressBar
 
 
 def extract_frames(video, dst):
@@ -11,10 +12,8 @@ def extract_frames(video, dst):
     command1 += '-y' + " "
     command1 += "-r " + "8 "
     command1 += '{0}/%06d.jpg'.format(dst)
-    print(command1)
-    #    print command1
+    # print(command1)
     os.system(command1)
-    return
 
 
 if __name__ == '__main__':
@@ -24,12 +23,13 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     vid_list = os.listdir(args.video_path)
-
+    pb = ProgressBar(len(vid_list))
+    pb.start()
     for vid_id in vid_list:
         name = os.path.join(args.video_path, vid_id)
         dst = os.path.join(args.out_dir, vid_id[:-4])
-        print(dst)
         if not os.path.exists(dst):
             os.makedirs(dst)
         extract_frames(name, dst)
-        print("finish video id: " + vid_id)
+        pb.update()
+

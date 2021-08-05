@@ -60,7 +60,7 @@ def extract_feats(params, model, load_img):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--gpu", dest='gpu', type=str, default='1',
+    parser.add_argument("--gpu", dest='gpu', type=str, default='9',
                         help='Set CUDA_VISIBLE_DEVICES environment variable, optional')
     parser.add_argument("--output_dir", dest='output_dir', type=str,
                         default='data/LLP_dataset/feats/r2plus1d_18', help='directory to store features')
