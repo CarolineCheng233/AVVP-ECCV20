@@ -12,7 +12,10 @@ import pandas as pd
 def train(args, model, train_loader, optimizer, criterion, epoch):
     model.train()
     for batch_idx, sample in enumerate(train_loader):
-        audio, video, video_st, target = sample['audio'].to('cuda'), sample['video_s'].to('cuda'), sample['video_st'].to('cuda'), sample['label'].type(torch.FloatTensor).to('cuda')
+        audio, video, video_st, target = sample['audio'].to('cuda'), \
+                                         sample['video_s'].to('cuda'), \
+                                         sample['video_st'].to('cuda'), \
+                                         sample['label'].type(torch.FloatTensor).to('cuda')
 
         optimizer.zero_grad()
         output, a_prob, v_prob, _ = model(audio, video, video_st)
